@@ -37,11 +37,7 @@ jobs:
           resource-group: rg-aks-test
           cluster-name: aks-cluster
 
-      # Deploy infrastructure components first
-      - name: Deploy KeyVault and External DNS
-        run: |
-          if [ -d "keyvault" ]; then kubectl apply -f keyvault/; fi
-          if [ -d "external-dns" ]; then kubectl apply -f external-dns/; fi
+
         
       # Deploy databases
       - name: Deploy Databases
