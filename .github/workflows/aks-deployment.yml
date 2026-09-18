@@ -1,17 +1,13 @@
 name: Deploy Manifests to AKS
 
 on:
-  push:
+  workflow_run:
+    workflows: 
+      - "Build & Push Docker Image"
+      - "Build & Push Simulator Image"
+    types:
+      - completed
     branches: [main]
-    paths:
-      - 'axion-database/**'
-      - 'axion-ui/**'
-      - 'ingestion/**'
-      - 'simulator/**'
-      - 'telemetry/**'
-      - 'external-dns/**'
-      - 'keyvault/**'
-      - 'pgadmin/**'
   workflow_dispatch:
 
 permissions:
@@ -22,6 +18,7 @@ jobs:
   deploy-to-aks:
     name: Deploy Manifests to AKS
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
