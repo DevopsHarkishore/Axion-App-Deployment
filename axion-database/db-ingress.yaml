@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mydb-ingress
+  namespace: dev
+  labels:
+    app: mydbingress
+spec:
+  ingressClassName: azure-application-gateway
+  rules:
+    - host: mydatabase.hypertrace.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: database-service
+                port:
+                  number: 9090

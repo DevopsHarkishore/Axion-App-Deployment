@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pgadmin-ingress
+  namespace: dev
+  labels:
+    app: pgadmin-ingress
+spec:
+  ingressClassName: azure-application-gateway
+  rules:
+    - host: pgadmin.hypertrace.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pgadmin-service
+                port:
+                  number: 9080

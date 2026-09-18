@@ -1,0 +1,65 @@
+name: Deploy Manifests to AKS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'axion-database/**'
+      - 'axion-ui/**'
+      - 'ingestion/**'
+      - 'simulator/**'
+      - 'telemetry/**'
+      - 'external-dns/**'
+      - 'keyvault/**'
+      - 'pgadmin/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-to-aks:
+    name: Deploy Manifests to AKS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS Credentials
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: rg-aks-test
+          cluster-name: aks-cluster
+
+      # Deploy infrastructure components first
+      - name: Deploy KeyVault and External DNS
+        run: |
+          if [ -d "keyvault" ]; then kubectl apply -f keyvault/; fi
+          if [ -d "external-dns" ]; then kubectl apply -f external-dns/; fi
+        
+      # Deploy databases
+      - name: Deploy Databases
+        run: |
+          if [ -d "axion-database" ]; then kubectl apply -f axion-database/; fi
+          if [ -d "pgadmin" ]; then kubectl apply -f pgadmin/; fi
+
+      # Deploy backend services
+      - name: Deploy Backend Services
+        run: |
+          if [ -d "ingestion" ]; then kubectl apply -f ingestion/; fi
+          if [ -d "telemetry" ]; then kubectl apply -f telemetry/; fi
+          if [ -d "simulator" ]; then kubectl apply -f simulator/; fi
+
+      # Deploy frontend
+      - name: Deploy UI
+        run: |
+          if [ -d "axion-ui" ]; then kubectl apply -f axion-ui/; fi

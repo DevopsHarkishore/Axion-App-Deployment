@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin-deployment
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin-deployment
+  template:
+    metadata:
+      name: pgadmin-pod
+      labels:
+        app: pgadmin-deployment
+    spec:
+      containers:
+        - name: pgadmin-container
+          image: dpage/pgadmin4:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: "harkishoresingh@gmail.com"
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: "Admin@123"
+            - name: PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION
+              value: "False"
