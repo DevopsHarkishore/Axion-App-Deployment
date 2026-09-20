@@ -17,6 +17,7 @@ spec:
       containers:
         - name: axion-container
           image: acrdevproject4480.azurecr.io/axion-ui:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           resources:
