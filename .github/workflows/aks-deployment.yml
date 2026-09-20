@@ -10,21 +10,30 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            axion-data-simulator: 'app-code/axion-data-simulator/**'
+            axion-ingestion-service: 'app-code/axion-ingestion-service/**'
+            axion-telemetry-query-service: 'app-code/axion-telemetry-query-service/**'
+            axion-ui: 'app-code/axion-ui/**'
+
   build-and-push:
     name: Build & Push Images
+    needs: changes
+    if: ${{ needs.changes.outputs.services != '[]' && needs.changes.outputs.services != '' }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        service: 
-          - name: axion-data-simulator
-            image: acrdevproject4480.azurecr.io/axion-data-simulator
-          - name: axion-ingestion-service
-            image: acrdevproject4480.azurecr.io/axion-ingestion-service
-          - name: axion-telemetry-query-service
-            image: acrdevproject4480.azurecr.io/axion-telemetry-query-service
-          - name: axion-ui
-            image: acrdevproject4480.azurecr.io/axion-ui
-
+        service: ${{ fromJSON(needs.changes.outputs.services) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,7 +55,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ matrix.service.image }}
+          images: acrdevproject4480.azurecr.io/${{ matrix.service }}
           tags: |
             type=sha,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
@@ -54,7 +63,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: app-code/${{ matrix.service.name }}
+          context: app-code/${{ matrix.service }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -63,7 +72,11 @@ jobs:
 
   deploy-to-aks:
     name: Deploy Manifests to AKS
-    needs: build-and-push
+    needs: [changes, build-and-push]
+    if: |
+      always() && 
+      needs.changes.result == 'success' && 
+      (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     runs-on: ubuntu-latest
 
     steps:
