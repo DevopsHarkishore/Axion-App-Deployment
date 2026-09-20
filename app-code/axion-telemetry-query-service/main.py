@@ -35,7 +35,7 @@ app = FastAPI(
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://axion.hypertrace.online"], # For development, allow all
+    allow_origins=["*"], # For development, allow all
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
