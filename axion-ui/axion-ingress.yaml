@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: azure-application-gateway
   rules:
-    - host: axion.techno028.shop
+    - host: axion.hypertrace.online
       http:
         paths:
           - path: /

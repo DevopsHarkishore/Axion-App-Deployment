@@ -10,11 +10,11 @@ metadata:
 spec:
   ingressClassName: azure-application-gateway
   rules:
-    - host: telemetry.techno028.shop
+    - host: telemetry.hypertrace.online
       http:
         paths:
           - path: /
-            pathType: Prefix
+            pathType: Prefix  
             backend:
               service:
                 name: telemetry-service

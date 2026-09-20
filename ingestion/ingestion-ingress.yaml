@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: azure-application-gateway
   rules:
-    - host: ingestion.techno028.shop
+    - host: ingestion.hypertrace.online
       http:
         paths:
           - path: /
