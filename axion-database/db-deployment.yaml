@@ -21,8 +21,17 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_USER
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
-              value: "admin@#123"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
-              value: "mydatabase"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_DB

@@ -21,4 +21,7 @@ spec:
             - containerPort: 8000
           env:
             - name: API_URL
-              value: "http://ingestion-service:9070/api/v1/telemetry/ingest"
+              valueFrom:
+                configMapKeyRef:
+                  name: simulator-config
+                  key: API_URL

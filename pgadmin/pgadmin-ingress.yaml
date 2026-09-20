@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: azure-application-gateway
   rules:
-    - host: pgadmin.hypertrace.online
+    - host: pgadmin.techno028.shop
       http:
         paths:
           - path: /
