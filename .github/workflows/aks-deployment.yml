@@ -1,12 +1,7 @@
-name: Deploy Manifests to AKS
+name: Build, Push and Deploy to AKS
 
 on:
-  workflow_run:
-    workflows: 
-      - "Build & Push Docker Image"
-      - "Build & Push Simulator Image"
-    types:
-      - completed
+  push:
     branches: [main]
   workflow_dispatch:
 
@@ -15,10 +10,61 @@ permissions:
   contents: read
 
 jobs:
+  build-and-push:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: 
+          - name: axion-data-simulator
+            image: acrdevproject4480.azurecr.io/axion-data-simulator
+          - name: axion-ingestion-service
+            image: acrdevproject4480.azurecr.io/axion-ingestion-service
+          - name: axion-telemetry-query-service
+            image: acrdevproject4480.azurecr.io/axion-telemetry-query-service
+          - name: axion-ui
+            image: acrdevproject4480.azurecr.io/axion-ui
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Log in to Azure Container Registry
+        run: az acr login --name acrdevproject4480
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ matrix.service.image }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: app-code/${{ matrix.service.name }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy-to-aks:
     name: Deploy Manifests to AKS
+    needs: build-and-push
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
@@ -36,8 +82,6 @@ jobs:
         with:
           resource-group: rg-aks-test
           cluster-name: aks-cluster
-
-
         
       # Deploy databases
       - name: Deploy Databases
