@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: azure-application-gateway
   rules:
-    - host: mydatabase.techno028.shop
+    - host: database.hypertrace.online
       http:
         paths:
           - path: /
