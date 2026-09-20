@@ -16,6 +16,9 @@ spec:
     spec:
       containers:
         - name: ingestion-container
-          image: acrdevproject4480.azurecr.io/ingestion:v1
+          image: acrdevproject4480.azurecr.io/axion-ingestion-service:latest
           ports:
             - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://admin:admin%40%23123@database-service:9090/mydatabase"

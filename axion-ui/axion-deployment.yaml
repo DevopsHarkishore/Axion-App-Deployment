@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: axion-container
-          image: gauravajayacr.azurecr.io/axion-ui:v50
+          image: acrdevproject4480.azurecr.io/axion-ui:latest
           ports:
             - containerPort: 80
           resources:

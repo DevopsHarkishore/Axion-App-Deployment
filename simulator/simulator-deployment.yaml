@@ -16,6 +16,9 @@ spec:
     spec:
       containers:
         - name: simulator
-          image: acrdevproject4480.azurecr.io/simulator:v2
+          image: acrdevproject4480.azurecr.io/axion-data-simulator:latest
           ports:
             - containerPort: 8000
+          env:
+            - name: API_URL
+              value: "http://ingestion-service:9070/api/v1/telemetry/ingest"
